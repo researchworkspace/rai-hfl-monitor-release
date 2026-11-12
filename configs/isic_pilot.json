@@ -1,0 +1,53 @@
+{
+  "name": "isic-pilot",
+  "data_root": "data",
+  "isic": {
+    "clients_per_centre": 3,
+    "seed": 0,
+    "group": "sex",
+    "reference_frac": 0.08
+  },
+  "run": {
+    "rounds": 60,
+    "local_epochs": 1,
+    "lr": 0.5,
+    "batch": 128,
+    "clip": 1.0,
+    "target_eps": 6.0,
+    "n_sub": 10000
+  },
+  "injection_defaults": {
+    "t0": 20,
+    "target_edge": 2,
+    "drop_frac": 0.5,
+    "v1_level": 5,
+    "ramp": 20
+  },
+  "thresholds": {
+    "sp": 0.26,
+    "eo": 0.25,
+    "acc_min": 0.6,
+    "eps_max": 8.0,
+    "rob_drop": 0.04,
+    "attr_min": 0.9
+  },
+  "grid": {
+    "datasets": [
+      "isic"
+    ],
+    "learners": [
+      "fedavg",
+      "fairfed",
+      "eafclc"
+    ],
+    "injections": [
+      {
+        "kind": "V0"
+      }
+    ],
+    "seeds": [
+      1000,
+      1001
+    ]
+  }
+}

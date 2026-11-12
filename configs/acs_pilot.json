@@ -1,0 +1,49 @@
+{
+  "name": "acs-pilot",
+  "data_root": "data",
+  "acs": {
+    "shard_rows": 10000,
+    "seed": 0
+  },
+  "run": {
+    "rounds": 60,
+    "local_epochs": 1,
+    "lr": 2.0,
+    "batch": 256,
+    "clip": 1.0,
+    "target_eps": 6.0,
+    "n_sub": 10000
+  },
+  "injection_defaults": {
+    "t0": 20,
+    "target_edge": 7,
+    "drop_frac": 0.9,
+    "shift_std": 2.0
+  },
+  "thresholds": {
+    "sp": 0.26,
+    "eo": 0.2,
+    "acc_min": 0.72,
+    "eps_max": 8.0,
+    "rob_drop": 0.04,
+    "attr_min": 0.9
+  },
+  "grid": {
+    "datasets": [
+      "acs"
+    ],
+    "learners": [
+      "fedavg",
+      "fairfed",
+      "eafclc"
+    ],
+    "injections": [
+      {
+        "kind": "V0"
+      }
+    ],
+    "seeds": [
+      1000
+    ]
+  }
+}

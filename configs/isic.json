@@ -1,0 +1,264 @@
+{
+  "name": "isic",
+  "data_root": "data",
+  "isic": {
+    "clients_per_centre": 3,
+    "seed": 0,
+    "group": "sex",
+    "reference_frac": 0.08
+  },
+  "run": {
+    "rounds": 60,
+    "local_epochs": 1,
+    "lr": 0.5,
+    "batch": 128,
+    "clip": 1.0,
+    "target_eps": 6.0,
+    "n_sub": 10000
+  },
+  "injection_defaults": {
+    "t0": 20,
+    "target_edge": 2,
+    "drop_frac": 0.5,
+    "v1_level": 5,
+    "ramp": 20
+  },
+  "grid": {
+    "datasets": [
+      "isic"
+    ],
+    "learners": [
+      "fedavg",
+      "fairfed",
+      "eafclc"
+    ],
+    "injections": [
+      {
+        "kind": "V0"
+      },
+      {
+        "kind": "V1"
+      },
+      {
+        "kind": "V2"
+      },
+      {
+        "kind": "V3",
+        "byz_frac": 0.1
+      },
+      {
+        "kind": "V3",
+        "byz_frac": 0.2
+      },
+      {
+        "kind": "V4"
+      },
+      {
+        "kind": "V5"
+      },
+      {
+        "kind": "V6",
+        "shift_train": false
+      }
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "thresholds": {
+    "sp": 0.26,
+    "eo": 0.25,
+    "acc_min": 0.6,
+    "eps_max": 8.0,
+    "rob_drop": 0.04,
+    "attr_min": 0.9
+  },
+  "settings": [
+    {
+      "placement": "P1"
+    },
+    {
+      "placement": "P2",
+      "n_eval": 0
+    },
+    {
+      "placement": "P2c",
+      "n_eval": 0
+    },
+    {
+      "placement": "P3",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "n_eval": 0
+    },
+    {
+      "placement": "P2",
+      "n_eval": 200
+    },
+    {
+      "placement": "P2c",
+      "n_eval": 200
+    },
+    {
+      "placement": "P3",
+      "n_eval": 200
+    },
+    {
+      "placement": "P4",
+      "n_eval": 200
+    },
+    {
+      "placement": "P2",
+      "n_eval": 50
+    },
+    {
+      "placement": "P2c",
+      "n_eval": 50
+    },
+    {
+      "placement": "P3",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "ablation": "A1",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "ablation": "A2a",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "ablation": "A2b",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "ablation": "A4",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "ablation": "A1",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "ablation": "A2a",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "ablation": "A2b",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "ablation": "A4",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "n_eval": 0,
+      "delay": 1,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 0,
+      "delay": 5,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 0,
+      "delay": 10,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 0,
+      "delay": 1,
+      "mode": "fail_operational"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 200,
+      "delay": 1,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 200,
+      "delay": 5,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 200,
+      "delay": 10,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 200,
+      "delay": 1,
+      "mode": "fail_operational"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 50,
+      "delay": 1,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 50,
+      "delay": 5,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 50,
+      "delay": 10,
+      "mode": "fail_safe"
+    },
+    {
+      "placement": "P4",
+      "n_eval": 50,
+      "delay": 1,
+      "mode": "fail_operational"
+    },
+    {
+      "placement": "P4R"
+    },
+    {
+      "placement": "P4R",
+      "ablation": "A3"
+    },
+    {
+      "placement": "P2s",
+      "n_eval": 0
+    },
+    {
+      "placement": "P2s",
+      "n_eval": 200
+    },
+    {
+      "placement": "P2s",
+      "n_eval": 50
+    }
+  ]
+}
