@@ -13,7 +13,9 @@ In the order of the paper:
 - the evaluation data a domain needs, from the design-time decidability analysis (sample_size.csv);
 - interval coverage in simulation and against the test split (simulated_coverage.csv, coverage.csv.gz);
 - exposure of the model in service (retained.csv);
-- domains excluded from per-domain scoring by the support rule (support.csv).
+- domains excluded from per-domain scoring by the support rule (support.csv);
+- point estimates against intervals with the report-integrity alarm off in both (point_vs_intervals.csv,
+  point_vs_intervals_tests.csv).
 The tests of the ablations are in `analysis.py`.
 """
 
@@ -28,7 +30,7 @@ import numpy as np
 import pandas as pd
 
 from . import stats
-from .analysis import load, select
+from .analysis import load, per_config, pooled, select
 from .replay import Evidence, Thresholds, Trajectory, counts_of, paired_v0, spearman
 
 QS = (1.0, 0.95, 0.9, 0.8, 0.7, 0.5)
@@ -60,6 +62,39 @@ def rules(r: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------- localisation and integrity alarms
+
+POINT_VS_INTERVALS = {  # label: ablation of P4
+    "point, alarm": "A1", "intervals fail-safe, alarm": "A2b",
+    "point, no alarm": "A1+A4", "intervals fail-safe, no alarm": "A2b+A4", "intervals oracle, no alarm": "A4",
+}
+
+
+def point_vs_intervals(r: pd.DataFrame, rng) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    """Point estimates against intervals under the fail-safe default, with the report-integrity alarm on and off.
+    With the alarm off in both (A4), every other check and rule is unchanged, which isolates the fairness and accuracy
+    checks. Tests: point minus intervals (alarm off) per configuration and with random-state clusters."""
+    rows = []
+    for n_eval in (0, 50):
+        for ds, c in r.groupby("dataset"):
+            for lab, ab in POINT_VS_INTERVALS.items():
+                s = select(c, "P4", ablation=ab, n_eval=n_eval)
+                inj = s[s.inj != "V0"]
+                rows.append({"n_eval": n_eval or "all", "dataset": ds, "setting": lab, "runs": len(s),
+                             "exposure_injected": inj.violating_deployments.mean(), "fb_injected": inj.fb_rate.mean(),
+                             "fb_V0": s[s.inj == "V0"].fb_rate.mean(), "esc100": s.esc100.mean()})
+    viol = [i for i in sorted(r.inj.unique()) if i != "V0"]
+    frames, summary = [], {}
+    for n_eval in (0, 50):
+        a = ("P4", {"ablation": "A1+A4", "n_eval": n_eval})
+        b = ("P4", {"ablation": "A2b+A4", "n_eval": n_eval})
+        for metric, col, injs in (("exposure", "violating_deployments", viol),
+                                  ("false_block_rate", "fb_rate", sorted(r.inj.unique()))):
+            t = per_config(r, a, b, col, injs).assign(n_eval=n_eval or "all", metric=metric)
+            frames.append(t)
+            summary[f"n_eval={n_eval or 'all'}/{metric}"] = pooled(t, rng)
+    tests = pd.concat(frames, ignore_index=True).drop(columns=["d", "seeds"])
+    return pd.DataFrame(rows), tests, summary
+
 
 def scope_edge(cid: str, client_edge: list[int]) -> int | None:
     part = cid.split("/")[1]
@@ -509,6 +544,9 @@ def main() -> None:
     rt.to_csv(out / "retained.csv", index=False)
     summary["retained_ground_truth_mismatches"] = mism
     support(traj, th_by_ds).to_csv(out / "support.csv", index=False)
+    pvi, pvi_t, summary["point_vs_intervals"] = point_vs_intervals(r, np.random.default_rng(0))
+    pvi.to_csv(out / "point_vs_intervals.csv", index=False)
+    pvi_t.to_csv(out / "point_vs_intervals_tests.csv", index=False)
 
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=str))
     print(json.dumps(summary, indent=1, default=str))

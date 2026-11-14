@@ -77,12 +77,12 @@ bash scripts/reproduce.sh <stage> [jobs] # one stage
 |---|---|---|
 | `pilot` | 9 pilot runs (control runs with seeds 1000 and 1001), used by the decidability analysis only | `outputs/pilot/` |
 | `train` | 240 trajectories: 2 federations × 3 learners × 8 injection settings × 5 seeds | `outputs/trajectories/` |
-| `replay` | every placement, ablation, evaluation sample size and approver setting (38 per trajectory) | `outputs/replay/{acs,isic}.csv` |
+| `replay` | every placement, ablation, evaluation sample size and approver setting (42 per trajectory) | `outputs/replay/{acs,isic}.csv` |
 | `rq2` | composition failures (RQ2), observed heterogeneity, the cases Tiered missed | `outputs/rq2/` |
 | `decisions` | per-round decisions and non-passing checks of selected placements | `outputs/decisions/` |
 | `decidability` | design-time decidability analysis, predicted against observed | `outputs/decidability/` |
 | `analysis` | RQ1, RQ3 and RQ5 and the statistical tests (exact and cluster sign-flip, Holm) | `outputs/analysis/` |
-| `posthoc` | post-hoc analyses: decision rules, localisation, imperfect approver, coverage, model in service, sample size | `outputs/posthoc/` |
+| `posthoc` | post-hoc analyses: decision rules, point estimates against intervals without the integrity alarm, localisation, imperfect approver, coverage, model in service, sample size | `outputs/posthoc/` |
 | `figures` | figures and tables of the paper | `paper/figures/`, `paper/tables/` |
 
 Training is the expensive stage. In the paper, a census trajectory took a median of 543 s on 16 CPU cores with
@@ -130,7 +130,7 @@ Figure 2) are drawn by hand and are not generated.
 | answers to RQ1 and RQ3 | `fig_exposure.pdf`, `table_exposure.tex`, `table_rq1.tex`, `table_rq3.tex`, `table_delay.tex` |
 | answer to RQ2 | `fig_soundness.pdf`, `table_rq2.tex`, `table_beta.tex` |
 | answers to RQ4 and RQ5 | `fig_overhead.pdf`, `table_overhead.tex`, `fig_decidability.pdf` |
-| Tiered without an approver and selected decision rules | `fig_tradeoff.pdf`, `table_ph1.tex`, `fig_timeline.pdf` |
+| Tiered without an approver and selected decision rules | `table_tradeoff.tex`, `fig_tradeoff.pdf`, `table_ph1.tex`, `table_ph5.tex`, `fig_timeline.pdf` |
 | which mechanisms matter | `table_ablation.tex` |
 | localisation | `table_localisation.tex`, `table_integrity.tex` |
 | an imperfect approver | `fig_reviewer.pdf`, `table_reviewer.tex` |

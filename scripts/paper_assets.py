@@ -634,6 +634,44 @@ def table_rq1(d: Data, out: Path) -> dict:
     (out / "table_rq1.tex").write_text("\n".join(lines) + "\n")
     return facts
 
+def table_tradeoff(d: Data, out: Path) -> dict:
+    """Exposure and false-block rates of the four simple placements and Tiered's fail-safe default, all rows."""
+    m = d.csv("posthoc/rules.csv")
+    lines, facts = [], {}
+    for key_ in ["P1", "P2", "P2s", "P3", "P4-hold"]:
+        cells = []
+        for ds in ["acs", "isic"]:
+            r = m[(m.dataset == ds) & (m.n_eval.astype(str) == "all") & (m.setting == key_)].iloc[0]
+            facts[f"{ds}/{key_}"] = {"exposure": r.exposure_injected, "fb_inj": r.fb_injected, "fb_V0": r.fb_V0}
+            cells += [f"{r.exposure_injected:.2f}", f"{100 * r.fb_injected:.1f}", f"{100 * r.fb_V0:.1f}"]
+        lab = r"\Tiered (fail-safe default)" if key_ == "P4-hold" else PL[key_].replace("Uniform-scoped", r"\UniformS")
+        lines.append(f"{lab} & " + " & ".join(cells) + r"\\")
+    (out / "table_tradeoff.tex").write_text("\n".join(lines) + "\n")
+    return facts
+
+
+def table_point_vs_intervals(d: Data, out: Path) -> dict:
+    """Point estimates against intervals (fail-safe default), with the report-integrity alarm on and off."""
+    m = d.csv("posthoc/point_vs_intervals.csv")
+    order = [("point, alarm", "Point estimates", "on"), ("intervals fail-safe, alarm", "Intervals", "on"),
+             ("point, no alarm", "Point estimates", "off"), ("intervals fail-safe, no alarm", "Intervals", "off")]
+    lines, facts = [], {}
+    for n in ["all", "50"]:
+        head = "All evaluation rows" if n == "all" else r"$\neval=50$"
+        lines.append(r"\multicolumn{8}{l}{\textit{" + head + r"}}\\")
+        for key_, lab, alarm in order:
+            cells = []
+            for ds in ["acs", "isic"]:
+                r = m[(m.dataset == ds) & (m.n_eval.astype(str) == n) & (m.setting == key_)].iloc[0]
+                facts[f"{ds}/{n}/{key_}"] = {"exposure": r.exposure_injected, "fb_inj": r.fb_injected, "fb_V0": r.fb_V0}
+                cells += [f"{r.exposure_injected:.2f}", f"{100 * r.fb_injected:.1f}", f"{100 * r.fb_V0:.1f}"]
+            lines.append(f"\\quad {lab} & {alarm} & " + " & ".join(cells) + r"\\")
+        if n == "all":
+            lines.append(r"\midrule")
+    (out / "table_ph5.tex").write_text("\n".join(lines) + "\n")
+    return facts
+
+
 def table_ph1(d: Data, out: Path) -> dict:
     m = d.csv("posthoc/rules.csv")
     names = ["P1", "P2", "P2s", "P3", "P4-point", "P4-hold", "P4-deploy", "P4-reviewer"]
@@ -854,7 +892,7 @@ def main() -> None:
             "t_exposure": lambda: table_exposure(d, t),
             "t_ablation": lambda: table_ablation(d, t), "t_localisation": lambda: table_localisation(d, t),
             "t_overhead": lambda: table_overhead(d, t), "t_rq1": lambda: table_rq1(d, t),
-            "t_ph1": lambda: table_ph1(d, t), "t_rq2": lambda: table_rq2(d, t), "t_rq3": lambda: table_rq3(d, t),
+            "t_ph1": lambda: table_ph1(d, t), "t_tradeoff": lambda: table_tradeoff(d, t), "t_ph5": lambda: table_point_vs_intervals(d, t), "t_rq2": lambda: table_rq2(d, t), "t_rq3": lambda: table_rq3(d, t),
             "t_reviewer": lambda: table_reviewer(d, t), "t_decidability": lambda: table_decidability(d, t),
             "t_details": lambda: table_details(d, t), "t_retained": lambda: table_retained(d, t),
             "t_coverage": lambda: table_coverage(d, t), "t_samplesize": lambda: table_samplesize(d, t)}

@@ -259,6 +259,26 @@
     {
       "placement": "P2s",
       "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "ablation": "A1+A4",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "ablation": "A1+A4",
+      "n_eval": 50
+    },
+    {
+      "placement": "P4",
+      "ablation": "A2b+A4",
+      "n_eval": 0
+    },
+    {
+      "placement": "P4",
+      "ablation": "A2b+A4",
+      "n_eval": 50
     }
   ]
 }

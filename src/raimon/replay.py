@@ -45,7 +45,7 @@ class Thresholds:
 @dataclass(frozen=True)
 class Setting:
     placement: str                    # P1 | P2 | P2s | P2c | P3 | P4 | P4R
-    ablation: str = ""                # "" | A1 | A2a | A2b | A4
+    ablation: str = ""                # "" | A1 | A2a | A2b | A3 | A4, or several joined by "+" (e.g. "A1+A4")
     n_eval: int = 0                   # 0 = all eval rows of a client; otherwise a fixed per-client subsample
     delay: int = 0
     mode: str = "fail_safe"           # fail_safe | fail_operational
@@ -203,6 +203,11 @@ class Evidence:
 BIG = 1e9
 
 
+def ablations(s: "Setting") -> set[str]:
+    """The ablations of a setting; "A1+A4" combines point estimates with no integrity alarm."""
+    return set(s.ablation.split("+")) - {""}
+
+
 def _finite(v: float, fallback: float) -> float:
     return float(v) if np.isfinite(v) else fallback
 
@@ -279,7 +284,7 @@ def _restricted_global_checks(edge_counts: list[np.ndarray], s: Setting, th: Thr
             continue
         for rid, iv, tau, beta in (("R1", stats.sp_gap(c, th.alpha), th.sp, beta_sp),
                                    ("R2", stats.eo_gap(c, th.alpha), th.eo, beta_eo)):
-            if s.ablation == "A3":
+            if "A3" in ablations(s):
                 out.append(_chk(f"{rid}/global@e{e}", "*", "upper", tau, iv, point))
             else:
                 out.append(_chk(f"{rid}/global@e{e}", "*", "sufficient_upper", tau - beta, iv, point))
@@ -291,7 +296,7 @@ def build_checks(s: Setting, t: int, ev: Evidence, th: Thresholds) -> list[dict]
     E = tr.n_edges
     edge_of = tr.edge_of_client()
     rep = ev.reported_counts(t)
-    point = s.placement not in ("P4", "P4R") or s.ablation == "A1"
+    point = s.placement not in ("P4", "P4R") or "A1" in ablations(s)
     checks: list[dict] = []
     if s.placement == "P1":
         checks += _fair_checks("global", "*", ev.ref_counts(t), th, True)
@@ -323,7 +328,7 @@ def build_checks(s: Setting, t: int, ev: Evidence, th: Thresholds) -> list[dict]
                            stats.Interval(*(float(z["eps_declared"][t].max()),) * 3), True))
     elif s.placement in ("P4", "P4R"):
         trusted = np.ones(tr.n_clients, bool)
-        if s.ablation != "A4":
+        if "A4" not in ablations(s):
             aud = ev.audit_counts(t)
             for k in range(tr.n_clients):
                 c = _trust_check(k, f"e{edge_of[k]}", rep[k], aud[k], th, point)
@@ -352,9 +357,9 @@ def build_checks(s: Setting, t: int, ev: Evidence, th: Thresholds) -> list[dict]
 
 def decide(s: Setting, decisions: dict[str, str]) -> dict[str, str]:
     """Apply ablation A2 (no escalation): inconclusive becomes deploy (A2a) or hold (A2b)."""
-    if s.ablation == "A2a":
+    if "A2a" in ablations(s):
         return {d: ("deploy" if v == "escalate" else v) for d, v in decisions.items()}
-    if s.ablation == "A2b":
+    if "A2b" in ablations(s):
         return {d: ("hold" if v == "escalate" else v) for d, v in decisions.items()}
     return decisions
 
